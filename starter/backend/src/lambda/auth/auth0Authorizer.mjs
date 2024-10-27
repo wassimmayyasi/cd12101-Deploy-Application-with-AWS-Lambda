@@ -1,10 +1,13 @@
 import Axios from 'axios'
 import jsonwebtoken from 'jsonwebtoken'
+import jwksClient from "jwks-rsa";
 import { createLogger } from '../../utils/logger.mjs'
 
 const logger = createLogger('auth')
 
-const jwksUrl = 'https://test-endpoint.auth0.com/.well-known/jwks.json'
+const client = jwksClient({
+  jwksUri: `https://dev-ku543fgcc3uacvih.eu.auth0.com/.well-known/jwks.json`
+});
 
 export async function handler(event) {
   try {
@@ -42,12 +45,22 @@ export async function handler(event) {
   }
 }
 
+function getKey(header, callback) {
+  client.getSigningKey(header.kid, function(err, key) {
+    const signingKey = key.getPublicKey();
+    callback(null, signingKey);
+  });
+}
+
+
 async function verifyToken(authHeader) {
   const token = getToken(authHeader)
   const jwt = jsonwebtoken.decode(token, { complete: true })
 
-  // TODO: Implement token verification
-  return undefined;
+  jsonwebtoken.verify(jwt, getKey, {
+    algorithms: ['RS256']
+  })
+  return token;
 }
 
 function getToken(authHeader) {
