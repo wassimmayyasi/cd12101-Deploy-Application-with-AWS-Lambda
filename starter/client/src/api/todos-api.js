@@ -16,6 +16,22 @@ export async function getTodos(idToken) {
   return response.data.items
 }
 
+export async function getSortedTodos(idToken) {
+  console.log('Fetching sorted todos')
+
+  const response = await Axios.get(
+    `${process.env.REACT_APP_API_ENDPOINT}/todos-sorted`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`
+      }
+    }
+  )
+  console.log('Sorted Todos:', response.data)
+  return response.data.items
+}
+
 export async function createTodo(idToken, newTodo) {
   const response = await Axios.post(
     `${process.env.REACT_APP_API_ENDPOINT}/todos`,

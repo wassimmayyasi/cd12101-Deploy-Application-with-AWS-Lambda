@@ -13,7 +13,7 @@ import {
 
 import { useAuth0 } from '@auth0/auth0-react'
 import { useNavigate } from 'react-router-dom'
-import { deleteTodo, getTodos, patchTodo } from '../api/todos-api'
+import { deleteTodo, getSortedTodos, getTodos, patchTodo } from '../api/todos-api'
 import { NewTodoInput } from './NewTodoInput'
 
 export function Todos() {
@@ -77,7 +77,7 @@ export function Todos() {
   async function onTodoDelete(todoId) {
     try {
       const accessToken = await getAccessTokenSilently({
-        audience: `https://test-endpoint.auth0.com/api/v2/`,
+        audience: `https://dev-ku543fgcc3uacvih.eu.auth0.com/api/v2/`,
         scope: 'delete:todo'
       })
       await deleteTodo(accessToken, todoId)
@@ -91,7 +91,7 @@ export function Todos() {
     try {
       const todo = todos[pos]
       const accessToken = await getAccessTokenSilently({
-        audience: `https://test-endpoint.auth0.com/api/v2/`,
+        audience: `https://dev-ku543fgcc3uacvih.eu.auth0.com/api/v2/`,
         scope: 'write:todo'
       })
       await patchTodo(accessToken, todo.todoId, {
@@ -106,7 +106,7 @@ export function Todos() {
       )
     } catch (e) {
       console.log('Failed to check a TODO', e)
-      alert('Todo deletion failed')
+      alert('Todo update failed')
     }
   }
 
@@ -128,7 +128,7 @@ export function Todos() {
     async function foo() {
       try {
         const accessToken = await getAccessTokenSilently({
-          audience: `https://test-endpoint.auth0.com/api/v2/`,
+          audience: `https://dev-ku543fgcc3uacvih.eu.auth0.com/api/v2/`,
           scope: 'read:todos'
         })
         console.log('Access token: ' + accessToken)
@@ -147,7 +147,17 @@ export function Todos() {
       <Header as="h1">TODOs</Header>
 
       <NewTodoInput onNewTodo={(newTodo) => setTodos([...todos, newTodo])} />
-
+      <div>
+        <p>Sort by due date:</p>
+        <Button onClick={async () => {
+          const accessToken = await getAccessTokenSilently({
+            audience: `https://dev-ku543fgcc3uacvih.eu.auth0.com/api/v2/`,
+            scope: 'read:todos'
+          })
+          const sortedTodos = await getSortedTodos(accessToken);
+          setTodos(sortedTodos);
+        }}>Sort</Button>
+      </div>
       {renderTodos(loadingTodos, todos)}
     </div>
   )
