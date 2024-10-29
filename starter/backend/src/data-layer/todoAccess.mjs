@@ -93,4 +93,23 @@ export class TodoAccess {
         logger.info(`Delete completed, returned this: ${result}`);
         return result;
     }
+
+    async updateAttachmentUrl(todoId, userId, url) {
+        logger.info(`We're setting up the params for the update call`)
+        const params = {
+            TableName: this.todosTable,
+            Key: {
+                userId: userId,
+                todoId: todoId
+            },
+            UpdateExpression: 'SET attachmentUrl = :url',
+            ExpressionAttributeValues: {
+                ':url': url
+            }
+        };
+        logger.info(`We're about to update a todo: ${todoId} for user: ${userId} with the attachmentUrl: ${url}`);
+        const result = await this.dynamoDbClient.update(params);
+        logger.info(`Updating the attachment URL returned: ${JSON.stringify(result)}`)
+        return {}
+    }
 }

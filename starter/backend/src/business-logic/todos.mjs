@@ -38,3 +38,14 @@ export async function deleteTodo(todoId, userId) {
 export async function generatePresignedURL(todoId, userId) {
     return await s3Access.generatePresignedURLForUpload(todoId, userId)
 }
+
+export async function updateDynamoWithImageUrl(record) {
+    const bucketName = record.s3.bucket.name;
+    const objectKey = decodeURIComponent(record.s3.object.key.replace(/\+/g, " "));
+
+    const [userId, todoId] = objectKey.split('/');
+
+    const publicUrl = `https://${bucketName}.s3.amazonaws.com/${objectKey}`;
+
+    return todoAccess.updateAttachmentUrl(todoId, userId, publicUrl);
+}

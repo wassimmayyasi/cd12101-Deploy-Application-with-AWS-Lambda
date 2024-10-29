@@ -153,6 +153,31 @@ functions:
         Resource:
           - "*"
 
+  updateDynamoUploadedImg:
+    handler: src/lambda/event/updateDynamoUploadedImg.handler
+    events:
+     - s3:
+        bucket: ${self:provider.environment.S3_BUCKET_ATTACHMENTS}
+        event: s3:ObjectCreated:*
+        existing: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+        - s3:GetObject
+        Resource:
+          - arn:aws:s3:::${self:provider.environment.S3_BUCKET_ATTACHMENTS}/*
+      - Effect: Allow
+        Action:
+        - dynamodb:UpdateItem
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - "xray:PutTraceSegments"
+          - "xray:PutTelemtryRecords"
+        Resource:
+          - "*"
+
 
 resources:
   Resources:
@@ -194,6 +219,8 @@ resources:
       Properties:
         BucketName: ${self:provider.environment.S3_BUCKET_ATTACHMENTS}
         PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          IgnorePublicAcls: false
           BlockPublicPolicy: false
           RestrictPublicBuckets: false
         CorsConfiguration:
@@ -208,3 +235,16 @@ resources:
                 - POST
                 - PUT
               MaxAge: 3000
+
+    AttachmentsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: 
+          Ref: AttachmentsBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: "s3:GetObject"
+              Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET_ATTACHMENTS}/*"

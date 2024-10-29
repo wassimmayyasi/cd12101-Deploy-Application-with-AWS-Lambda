@@ -11,6 +11,10 @@ export function NewTodoInput({ onNewTodo }) {
 
   const onTodoCreate = async (event) => {
     try {
+      if(newTodoName === '') {
+        alert("Please add a title for your todo");
+        return
+      }
       const accessToken = await getAccessTokenSilently({
         audience: `https://dev-ku543fgcc3uacvih.eu.auth0.com/api/v2/`,
         scope: 'write:todos'
